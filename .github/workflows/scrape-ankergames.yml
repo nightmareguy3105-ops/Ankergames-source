@@ -1,0 +1,48 @@
+name: Scrape AnkerGames and produce hydralauncher JSON
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 3 * * *'   # daily at 03:00 UTC (adjust or remove if you don't want scheduled)
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 python-dateutil lxml
+
+      - name: Run scraper
+        # ensure scrape_ankergames.py is at repo root (or adjust path)
+        run: |
+          python scrape_ankergames.py --domain https://ankergames.net --output hydralauncher.json --name "AnkerGames" --workers 6 --delay 0.5
+        env:
+          TZ: UTC
+
+      - name: Show result summary
+        run: |
+          echo "---- JSON preview ----"
+          if [ -f hydralauncher.json ]; then
+            head -n 200 hydralauncher.json || true
+            echo "Size:"
+            du -h hydralauncher.json
+          else
+            echo "hydralauncher.json not created"
+            exit 1
+          fi
+
+      - name: Upload hydralauncher.json artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hydralauncher-json
+          path: hydralauncher.json
