@@ -58,7 +58,7 @@ def fetch_url(url, timeout=20):
         r.raise_for_status()
         return r
     except Exception as e:
-        # print(f"fetch error {url}: {e}", file=sys.stderr)
+        print(f"fetch error {url}: {e}", file=sys.stderr)
         return None
 
 def parse_sitemap(sitemap_xml, base_url):
@@ -304,7 +304,7 @@ def main():
                     if res.get("uris"):
                         downloads.append(res)
             except Exception as e:
-                # print(f"error parsing {u}: {e}", file=sys.stderr)
+                print(f"error parsing {u}: {e}", file=sys.stderr)
                 pass
 
     # Sort by uploadDate descending if available
@@ -320,3 +320,6 @@ def main():
     with open(args.output, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
     print(f"Wrote {len(downloads_sorted)} items to {args.output}", file=sys.stderr)
+
+if __name__ == "__main__":
+    main()
